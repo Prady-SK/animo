@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video to Anime Converter</title>
+  </head>
+  <body>
+    <h1>Video to Anime Converter</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".mp4,.avi,.mov" />
+      <input type="submit" value="Upload" />
+    </form>
+    <div id="status"></div>
+    <div id="download" style="display: none">
+      <a id="download-link" href="#">Download Processed Video</a>
+    </div>
+
+    <script>
+      const form = document.querySelector("form");
+      const status = document.getElementById("status");
+      const downloadDiv = document.getElementById("download");
+      const downloadLink = document.getElementById("download-link");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        // Upload file
+        status.textContent = "Uploading...";
+        const uploadResponse = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (uploadResponse.ok) {
+          // Process video
+          status.textContent = "Processing...";
+          const filename = formData.get("file").name;
+          const processResponse = await fetch(`/process/${filename}`, {
+            method: "POST",
+          });
+
+          if (processResponse.ok) {
+            status.textContent = "Processing complete!";
+            downloadLink.href = `/download/anime_${filename}`;
+            downloadDiv.style.display = "block";
+          } else {
+            status.textContent = "Error processing video";
+          }
+        } else {
+          status.textContent = "Error uploading file";
+        }
+      });
+    </script>
+  </body>
+</html>
